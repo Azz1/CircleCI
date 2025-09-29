@@ -19,7 +19,7 @@ def check_conflict(start_time, duration, cron_expressions_with_duration):
      #print("   Next run: " + jobname + " at " + str(first_run) + " for " + str(duration)) 
 	 
      # Check for conflicts starting from the first potential run 
-     if (first_run < start_time and first_run + duration > start_time) or (first_run < end_time and first_run  + duration >= end_time):
+     if (first_run < start_time and first_run + duration > start_time) or (first_run >= start_time and first_run < end_time):
        return True, jobname, first_run, duration    # Conflict found
       
      # Get the next run time  
@@ -59,3 +59,4 @@ if isconf:
   print("Conflict detected! " + jobname + " at " + str(tm) + " for " + str(du) ) 
 else: 
   print("No conflict detected.") 
+
