@@ -51,7 +51,7 @@ cron_list_with_duration = []
 with open(sys.argv[3], newline='') as csvfile:
   reader = csv.DictReader(csvfile)
   for row in reader:
-	if len(row['CronExpression']) > 0 :
+	if len(row['CronExpression'].strip()) > 0 :
       cron_list_with_duration.append((row['JobName'], row['CronExpression'], timedelta(minutes=int(row['Duration']))))
 
 isconf, jobname, tm, du = check_conflict(start_dt, duration, cron_list_with_duration)
@@ -60,5 +60,6 @@ if isconf:
   print("Conflict detected! " + jobname + " at " + str(tm) + " for " + str(du) ) 
 else: 
   print("No conflict detected.") 
+
 
 
