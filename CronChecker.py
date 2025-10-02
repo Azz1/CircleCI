@@ -7,10 +7,11 @@ from datetime import datetime, timedelta
 utc=pytz.UTC
 
 def check_conflict(start_time, duration, cron_expressions_with_duration):
+ print("Check: " + str(start_time) + " for " + str(duration)) 
+
  start_time = start_time.replace(tzinfo=utc)
  end_time = start_time.replace(tzinfo=utc) + duration
  
- print("Check: " + str(start_time) + " for " + str(duration)) 
  
  for jobname, cron_expression, duration in cron_expressions_with_duration:
    
