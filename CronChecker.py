@@ -23,12 +23,12 @@ def check_conflict(start_time, duration, cron_expressions_with_duration):
 	 
      # Check for conflicts starting from the first potential run 
      if (first_run < start_time and first_run + duration > start_time) or (first_run >= start_time and first_run < end_time):
-       return True, jobname, first_run.replace(tzinfo=datetime.now().tzinfo), duration    # Conflict found
+       return True, jobname, first_run.replace(tzinfo=datetime.now().tzinfo), duration, cron_expression    # Conflict found
       
      # Get the next run time  
      first_run = cronexpr.next_fire(cron_expression, first_run) 
       	   
- return False, '', end_time.replace(tzinfo=datetime.now().tzinfo), duration 		  		 # No conflict found
+ return False, '', end_time.replace(tzinfo=datetime.now().tzinfo), duration, '' 		  		 # No conflict found
 
    
 # Example usage 
@@ -46,7 +46,7 @@ start_dt = datetime.strptime(sys.argv[1], "%Y-%m-%d %H:%M:%S")
 duration = timedelta(minutes=int(sys.argv[2]))
  
 #cron_list_with_duration = [ ('job 1', '0 0 11 ? * * *', timedelta(minutes=30)), 	# Daily at 11:00 AM, runs for 30 minutes 
-#                            ('job 2', '0 30 11 ? * * *', timedelta(minutes=5)), 	# Daily at 11:30 AM, runs for 5 minutes #
+#                            ('job 2', '0 30 11 ? * * *', timedelta(minutes=5)), 	# Daily at 11:30 AM, runs for 5 minutes 
 #							('job 3', '0 0 10 ? * * *', timedelta(minutes=10))		# Daily at 10:00 AM, runs for 10 minutes
 #							] 
 
@@ -57,10 +57,9 @@ with open(sys.argv[3], newline='') as csvfile:
     if len(row['CronExpression'].strip()) > 0 :
       cron_list_with_duration.append((row['JobName'], row['CronExpression'], timedelta(minutes=int(row['Duration']))))
 
-isconf, jobname, tm, du = check_conflict(start_dt, duration, cron_list_with_duration)
+isconf, jobname, tm, du, cr = check_conflict(start_dt, duration, cron_list_with_duration)
 
 if isconf: 
-  print("Conflict detected! " + jobname + " at " + str(tm) + " for " + str(du) ) 
+  print("Conflict detected!\n " + jobname + " at " + str(tm) + " for " + str(du) + ", Cron expression [" + cr + "]" ) 
 else: 
   print("No conflict detected.") 
-
