@@ -1,31 +1,33 @@
-import croniter 
+import cronexpr 
 import csv 
 import sys
+import pytz
 from datetime import datetime, timedelta
 
+utc=pytz.UTC
+
 def check_conflict(start_time, duration, cron_expressions_with_duration):
- end_time = start_time + duration
- max_span_minutes = 300 
- check_start_datetime = datetime.now() - timedelta(minutes=max_span_minutes)
+ start_time = start_time.replace(tzinfo=utc)
+ end_time = start_time.replace(tzinfo=utc) + duration
+ 
  print("Check: " + str(start_time) + " for " + str(duration)) 
  
  for jobname, cron_expression, duration in cron_expressions_with_duration:
-   iter = croniter.croniter(cron_expression, check_start_datetime) 	
    
    # Get the first run time on or after check start_time 
-   first_run = iter.get_next(datetime) 
+   first_run = cronexpr.prev_fire(cron_expression, datetime.now().replace(tzinfo=utc)) 
 	
    while first_run < end_time:	
      #print("   Next run: " + jobname + " at " + str(first_run) + " for " + str(duration)) 
 	 
      # Check for conflicts starting from the first potential run 
      if (first_run < start_time and first_run + duration > start_time) or (first_run >= start_time and first_run < end_time):
-       return True, jobname, first_run, duration    # Conflict found
+       return True, jobname, first_run.replace(tzinfo=datetime.now().tzinfo), duration    # Conflict found
       
      # Get the next run time  
-     first_run = iter.get_next(datetime) 
+     first_run = cronexpr.next_fire(cron_expression, first_run) 
       	   
- return False, '', end_time, duration 		  		 # No conflict found
+ return False, '', end_time.replace(tzinfo=datetime.now().tzinfo), duration 		  		 # No conflict found
 
    
 # Example usage 
@@ -42,16 +44,16 @@ if len(sys.argv) < 4:
 start_dt = datetime.strptime(sys.argv[1], "%Y-%m-%d %H:%M:%S")
 duration = timedelta(minutes=int(sys.argv[2]))
  
-#cron_list_with_duration = [ ('job 1', '0 11 * * *', timedelta(minutes=30)), 	# Daily at 11:00 AM, runs for 30 minutes 
-#                            ('job 2', '30 11 * * *', timedelta(minutes=5)), 	# Daily at 11:30 AM, runs for 30 minutes #
-#							('job 3', '0 10 * * *', timedelta(minutes=10))		# Daily at 10:00 AM, runs for 10 minutes
+#cron_list_with_duration = [ ('job 1', '0 0 11 * * *', timedelta(minutes=30)), 	# Daily at 11:00 AM, runs for 30 minutes 
+#                            ('job 2', '0 30 11 * * *', timedelta(minutes=5)), 	# Daily at 11:30 AM, runs for 30 minutes #
+#							('job 3', '0 0 10 * * *', timedelta(minutes=10))		# Daily at 10:00 AM, runs for 10 minutes
 #							] 
 
 cron_list_with_duration = []
 with open(sys.argv[3], newline='') as csvfile:
   reader = csv.DictReader(csvfile)
   for row in reader:
-	if len(row['CronExpression'].strip()) > 0 :
+    if len(row['CronExpression'].strip()) > 0 :
       cron_list_with_duration.append((row['JobName'], row['CronExpression'], timedelta(minutes=int(row['Duration']))))
 
 isconf, jobname, tm, du = check_conflict(start_dt, duration, cron_list_with_duration)
@@ -60,6 +62,3 @@ if isconf:
   print("Conflict detected! " + jobname + " at " + str(tm) + " for " + str(du) ) 
 else: 
   print("No conflict detected.") 
-
-
-
