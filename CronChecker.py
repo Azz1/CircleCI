@@ -45,9 +45,9 @@ if len(sys.argv) < 4:
 start_dt = datetime.strptime(sys.argv[1], "%Y-%m-%d %H:%M:%S")
 duration = timedelta(minutes=int(sys.argv[2]))
  
-#cron_list_with_duration = [ ('job 1', '0 0 11 * * *', timedelta(minutes=30)), 	# Daily at 11:00 AM, runs for 30 minutes 
-#                            ('job 2', '0 30 11 * * *', timedelta(minutes=5)), 	# Daily at 11:30 AM, runs for 30 minutes #
-#							('job 3', '0 0 10 * * *', timedelta(minutes=10))		# Daily at 10:00 AM, runs for 10 minutes
+#cron_list_with_duration = [ ('job 1', '0 0 11 ? * * *', timedelta(minutes=30)), 	# Daily at 11:00 AM, runs for 30 minutes 
+#                            ('job 2', '0 30 11 ? * * *', timedelta(minutes=5)), 	# Daily at 11:30 AM, runs for 5 minutes #
+#							('job 3', '0 0 10 ? * * *', timedelta(minutes=10))		# Daily at 10:00 AM, runs for 10 minutes
 #							] 
 
 cron_list_with_duration = []
@@ -63,3 +63,4 @@ if isconf:
   print("Conflict detected! " + jobname + " at " + str(tm) + " for " + str(du) ) 
 else: 
   print("No conflict detected.") 
+
